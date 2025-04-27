@@ -2,13 +2,14 @@ import asyncio
 from config import bot, dp
 from misc.pgSQL import pgConnect
 from misc.keyboards import main_menu
-from handlers import start, survey
+from handlers import start, survey, UnCompSurvey
 
 
 async def main():
     # Подключение хендлеров
     dp.include_routers(start.router)
     dp.include_routers(survey.router)
+    dp.include_routers(UnCompSurvey.router)
 
     # Подключение к БД
     pgConnect()

@@ -28,6 +28,9 @@ async def changePageOpinion(callback_query: CallbackQuery):
 async def showOpinions(message: Message):
     await message.delete()
     keyboard = GenerateKeyboard(0, "opinion", get_new_surveys(message.from_user.id))
+    if not keyboard:
+        await message.answer("Нет доступных опросов.")
+        return
     await message.answer("Выберите опрос:", reply_markup=keyboard)
 
 
@@ -41,7 +44,12 @@ async def handleSelectOpinion(callback_query: CallbackQuery, state: FSMContext):
 
     # Устанавливаем начальное состояние FSM
     await state.set_state(OpinionState.opinion)
-    await state.update_data(opinion_id=opinion_id, questions=questions, current_question_id=None, multi_choices=[], message_id=None)
+    await state.update_data(
+        opinion_id=opinion_id, 
+        questions=questions, 
+        current_question_id=None, 
+        multi_choices=[], 
+        message_id=None)
 
     # Отправляем первый вопрос
     await SendNextQuestion(callback_query.from_user.id, state)
@@ -85,7 +93,6 @@ async def handleMultipleChoice(callback_query: CallbackQuery, state: FSMContext)
         # Переходим к следующему вопросу
         await SendNextQuestion(callback_query.from_user.id, state)
 
-
 # Обработка single_choice и scale
 @router.callback_query(OpinionState.opinion, lambda c: c.data.startswith("ans:"))
 async def handleSingleChoice(callback_query: CallbackQuery, state: FSMContext):
@@ -104,7 +111,6 @@ async def handleSingleChoice(callback_query: CallbackQuery, state: FSMContext):
     
     # НЕ удаляем сообщение, а отправляем следующий вопрос
     await SendNextQuestion(callback_query.from_user.id, state)
-
 
 # Обработка текстовых ответов
 @router.message(OpinionState.opinion, F.text)
@@ -160,6 +166,5 @@ async def handlePause(callback_query: CallbackQuery, state: FSMContext):
     # Удаляем сообщение с вопросом
     await callback_query.message.delete()
     await callback_query.answer("Опрос приостановлен. Вы можете продолжить позже.")
-
     # Очищаем состояние
     await state.clear()

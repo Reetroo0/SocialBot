@@ -16,11 +16,7 @@ dsn = os.getenv('DSN')
 
 # Создание пула соединений
 try:
-    connection_pool = psycopg2.pool.SimpleConnectionPool(
-        1,  # минимальное количество соединений
-        10, # максимальное количество соединений
-        dsn=dsn
-    )
+    connection_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=dsn)
     print("Connection pool created successfully")
 except psycopg2.OperationalError as e:
     print(f"Failed to connect to database: {e}")

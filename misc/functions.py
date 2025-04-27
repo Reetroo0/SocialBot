@@ -110,15 +110,19 @@ def GenerateKeyboard(page, callback_prefix, items):
 
 
 # Функция для отправки следующего вопроса
-async def SendNextQuestion(user_id: int, state: FSMContext):
+async def SendNextQuestion(user_id: int, state: FSMContext, resume: bool = False):
     data = await state.get_data()
     current_question_id = data.get("current_question_id")
     questions = data.get("questions", [])
     opinion_id = data.get("opinion_id", 0)
     prev_message_id = data.get("message_id")
 
-    # Находим следующий вопрос
-    next_question = get_next_question(current_question_id, questions)
+    # Выбираем вопрос: текущий при resume=True, иначе следующий
+    if resume and current_question_id:
+        next_question = next((q for q in questions if q["id"] == current_question_id), None)
+    else:
+        next_question = get_next_question(current_question_id, questions)
+
     if not next_question:
         await complete_survey(user_id, opinion_id, current_question_id, prev_message_id, state)
         return

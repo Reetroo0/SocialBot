@@ -16,6 +16,7 @@ def pgConnect():
     except Exception as e:
         print(f"Error connection to database: {e}")
 
+
 # Проверка существования пользователя
 def check_user(tg_id):
     try:
@@ -29,6 +30,7 @@ def check_user(tg_id):
     except Exception as e:
         print(f"Ошибка проверки пользователя (check_user): \n{e}")
         return False
+
 
 # Добавление нового пользователя
 def add_user(tg_id, age, gender):
@@ -44,6 +46,7 @@ def add_user(tg_id, age, gender):
             connection_pool.putconn(conn)
     except Exception as e:
         print(f"Ошибка добавления пользователя (add_user): \n{e}")
+
 
 # Функция для получения списка непройденных опросов из БД
 def get_new_surveys(user_id):
@@ -70,6 +73,7 @@ def get_new_surveys(user_id):
         print(f"Ошибка получения непройденных опросов (get_new_surveys): \n{e}")
         return []
 
+
 # Функция для получения списка незавершенных опросов из БД
 def get_uncompleted_surveys(user_id):
     try:
@@ -80,7 +84,7 @@ def get_uncompleted_surveys(user_id):
                     SELECT s.id, s.name 
                     FROM surveys s
                     JOIN current_users_questions cuq ON s.id = cuq.survey_id
-                    WHERE cuq.user_id = %s AND cuq.IsCompletedSurvey = false
+                    WHERE cuq.user_id = %s AND cuq.is_completed_survey = false
                     GROUP BY s.id, s.name
                     ORDER BY s.id
                 """
@@ -92,6 +96,7 @@ def get_uncompleted_surveys(user_id):
     except Exception as e:
         print(f"Ошибка получения незавершенных опросов (get_uncompleted_surveys): \n{e}")
         return []
+
 
 # Функция для получения вопросов по ID опроса
 def get_questions(opinion_id):
@@ -109,6 +114,7 @@ def get_questions(opinion_id):
     except Exception as e:
         print(f"Ошибка get_questions получения вопросов (get_questions): \n{e}")
         return json.dumps([])
+
 
 # Функция для сохранения ответа и обновления текущего вопроса
 def SaveAns_UpdateQuest(tg_id, opinion_id, question_id, answer, next_question_id=None):
@@ -159,3 +165,24 @@ def set_survey_paused(user_id, opinion_id):
     except Exception as e:
         print(f"Ошибка при установке статуса паузы (set_survey_paused): \n{e}")
         raise  # Пробрасываем исключение для обработки в вызывающем коде
+
+
+    # Функция для получения текущего вопроса из базы данных
+def get_current_question_id(user_id, opinion_id):
+    try:
+        conn = connection_pool.getconn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    '''SELECT quest_id 
+                       FROM current_users_questions 
+                       WHERE user_id = %s AND survey_id = %s''',
+                    (user_id, opinion_id)
+                )
+                result = cur.fetchone()
+                return result[0] if result else None
+        finally:
+            connection_pool.putconn(conn)
+    except Exception as e:
+        print(f"Ошибка получения текущего вопроса (get_current_question_id): \n{e}")
+        return None
