@@ -3,7 +3,7 @@ from aiogram import Router
 from aiogram.types import Message, CallbackQuery
 from misc.pgSQL import get_new_surveys, get_questions
 import json
-from misc.functions import GenerateKeyboard, SendNextQuestion, ParseQuestion, save_answer_and_update_question
+from misc.functions import GenerateKeyboard, SendNextQuestion, ParseQuestion, SaveAns_UpdateQuest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
@@ -74,7 +74,7 @@ async def handleMultipleChoice(callback_query: CallbackQuery, state: FSMContext)
     
     # Если достигнуто максимальное количество выборов, сохраняем и переходим дальше
     if len(multi_choices) == max_choices:
-        save_answer_and_update_question(
+        SaveAns_UpdateQuest(
             callback_query.from_user.id,
             opinion_id,
             question_id,
@@ -94,7 +94,7 @@ async def handleSingleChoice(callback_query: CallbackQuery, state: FSMContext):
     question_id = int(question_id)
     
     # Сохраняем ответ
-    save_answer_and_update_question(
+    SaveAns_UpdateQuest(
         callback_query.from_user.id,
         opinion_id,
         question_id,
@@ -119,7 +119,7 @@ async def handleTextAnswer(message: Message, state: FSMContext):
         return
     
     # Сохраняем текстовый ответ
-    save_answer_and_update_question(
+    SaveAns_UpdateQuest(
         message.from_user.id,
         opinion_id,
         question_id,
