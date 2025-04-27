@@ -138,3 +138,24 @@ def SaveAns_UpdateQuest(tg_id, opinion_id, question_id, answer, next_question_id
             connection_pool.putconn(conn)
     except Exception as e:
         print(f"Ошибка при сохранении ответа/обновлении вопроса (SaveAns_UpdateQuest): \n{e}")
+
+
+
+# Функция для установки статуса паузы опроса в базе данных
+def set_survey_paused(user_id, opinion_id):
+    try:
+        conn = connection_pool.getconn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    '''UPDATE current_users_questions 
+                       SET "is_completed_survey" = %s 
+                       WHERE user_id = %s AND survey_id = %s''',
+                    (False, user_id, opinion_id)
+                )
+                conn.commit()
+        finally:
+            connection_pool.putconn(conn)
+    except Exception as e:
+        print(f"Ошибка при установке статуса паузы (set_survey_paused): \n{e}")
+        raise  # Пробрасываем исключение для обработки в вызывающем коде

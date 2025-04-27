@@ -1,7 +1,7 @@
 from aiogram import F
 from aiogram import Router
 from aiogram.types import Message, CallbackQuery
-from misc.pgSQL import get_new_surveys, get_questions
+from misc.pgSQL import get_new_surveys, get_questions, set_survey_paused
 import json
 from misc.functions import GenerateKeyboard, SendNextQuestion, ParseQuestion, SaveAns_UpdateQuest
 from aiogram.fsm.context import FSMContext
@@ -132,3 +132,34 @@ async def handleTextAnswer(message: Message, state: FSMContext):
     
     # Отправляем следующий вопрос (или редактируем текущее)
     await SendNextQuestion(message.from_user.id, state)
+
+
+@router.callback_query(lambda c: c.data.startswith("pause:"))
+async def handlePause(callback_query: CallbackQuery, state: FSMContext):
+    # Извлекаем opinion_id и question_id из callback_data
+    _, opinion_id, question_id = callback_query.data.split(":")
+    opinion_id = int(opinion_id)
+    question_id = int(question_id)
+    user_id = callback_query.from_user.id
+
+    # Сохраняем текущее состояние в базе данных
+    try:
+        SaveAns_UpdateQuest(
+            user_id,
+            opinion_id,
+            question_id,
+            None,  # Ответ не сохраняем, так как это пауза
+            question_id  # Указываем текущий question_id как следующий
+        )
+        
+        # Устанавливаем is_completed_survey = false
+        set_survey_paused(user_id, opinion_id)
+    except Exception as e:
+        print(f"Ошибка при сохранении состояния паузы (handlePause): \n{e}")
+
+    # Удаляем сообщение с вопросом
+    await callback_query.message.delete()
+    await callback_query.answer("Опрос приостановлен. Вы можете продолжить позже.")
+
+    # Очищаем состояние
+    await state.clear()

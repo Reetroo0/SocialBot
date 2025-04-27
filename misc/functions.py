@@ -15,33 +15,33 @@ def ParseQuestion(opinion_id, question_id, question, selected=None):
         text = question["question"]
         row = []
 
+        # Инициализируем клавиатуру
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[])
+
         if question_type == "text":
-            return text, None, None, None
+            # Для текстовых вопросов добавляем только кнопку паузы
+            keyboard.inline_keyboard.append([
+                InlineKeyboardButton(text="⏸ Пауза", callback_data=f"pause:{opinion_id}:{question_id}")
+            ])
+            return text, keyboard, None, None
 
         elif question_type == "single_choice":
             options = question.get("options", [])
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[])
             for option in options:
                 button = InlineKeyboardButton(text=option, callback_data=f"ans:{option}:{opinion_id}:{question_id}")
                 row.append(button)
                 if len(row) == 2:
                     keyboard.inline_keyboard.append(row)
                     row = []
-            if row:  
+            if row:
                 keyboard.inline_keyboard.append(row)
-            return text, keyboard, None, None
 
         elif question_type == "multiple_choice":
             options = question.get("options", [])
             max_choices = question.get("max_choices")
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[])
-            
-            # Если selected не передан, инициализируем пустым списком
             if selected is None:
                 selected = []
-                
             for option in options:
-                # Добавляем маркер к выбранным опциям
                 button_text = f"✅ {option}" if option in selected else option
                 button = InlineKeyboardButton(text=button_text, callback_data=f"mans:{option}:{opinion_id}:{question_id}")
                 row.append(button)
@@ -50,10 +50,9 @@ def ParseQuestion(opinion_id, question_id, question, selected=None):
                     row = []
             if row:
                 keyboard.inline_keyboard.append(row)
-            return text, keyboard, max_choices, None
 
         elif question_type == "scale":
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            keyboard.inline_keyboard.extend([
                 [
                     InlineKeyboardButton(
                         text=f"⭐️{i}", callback_data=f"ans:{i}:{opinion_id}:{question_id}"
@@ -65,14 +64,19 @@ def ParseQuestion(opinion_id, question_id, question, selected=None):
                     ) for i in range(6, 11)
                 ]
             ])
-            return text, keyboard, None, None
 
         else:
             return "", None, None, f"Unknown question type: {question_type}"
 
+        # Добавляем кнопку паузы для всех типов вопросов, кроме текстовых
+        keyboard.inline_keyboard.append([
+            InlineKeyboardButton(text="⏸ Пауза", callback_data=f"pause:{opinion_id}:{question_id}")
+        ])
+
+        return text, keyboard, max_choices if question_type == "multiple_choice" else None, None
+
     except KeyError as e:
         return "", None, None, f"Missing required field: {e}"
-
     
 # Функция для генерации клавиатуры с опросами
 def GenerateKeyboard(page, callback_prefix, items):
@@ -160,7 +164,7 @@ async def SendNextQuestion(user_id: int, state: FSMContext):
     text, keyboard, max_choices, err = ParseQuestion(opinion_id, question_id, question_text)
     if err:
         await bot.send_message(user_id, "Ошибка парсинга вопроса")
-        print("Ошибка парсинга вопроса")
+        print(f"Ошибка парсинга вопроса (SendNextQuestion 167): \n{err}")
         # Переходим к следующему вопросу
         await state.update_data(current_question_id=question_id)
         await SendNextQuestion(user_id, state)
