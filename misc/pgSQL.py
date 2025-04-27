@@ -125,7 +125,7 @@ def SaveAns_UpdateQuest(tg_id, opinion_id, question_id, answer, next_question_id
                 # Сохраняем ответ в UsersAnswers, если ответ предоставлен
                 if answer is not None:
                     answer_json = json.dumps({"answer": answer}, ensure_ascii=False)
-                    cur.execute('''INSERT INTO users_answers (quest_id, survey_id, user_id, question)
+                    cur.execute('''INSERT INTO users_answers (quest_id, survey_id, user_id, answer)
                                  VALUES (%s, %s, %s, %s)''',
                                (question_id, opinion_id, tg_id, answer_json))
                 
@@ -167,7 +167,7 @@ def set_survey_paused(user_id, opinion_id):
         raise  # Пробрасываем исключение для обработки в вызывающем коде
 
 
-    # Функция для получения текущего вопроса из базы данных
+# Функция для получения текущего вопроса из базы данных
 def get_current_question_id(user_id, opinion_id):
     try:
         conn = connection_pool.getconn()
