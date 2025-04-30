@@ -1,6 +1,6 @@
-import psycopg2 as pg
 import json
-from config import connection_pool
+from config import connection_pool, logger
+
 
 # Подключение к БД (инициализация пула)
 def pgConnect():
@@ -9,12 +9,12 @@ def pgConnect():
         conn = connection_pool.getconn()
         try:
             with conn.cursor() as cur:
-                print('Database connection is OK')
+                logger.info("Database connection is OK")
                 conn.commit()
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Error connection to database: {e}")
+        logger.error(f"Error connection to database: {e}")
 
 
 # Проверка существования пользователя
@@ -28,7 +28,7 @@ def check_user(tg_id):
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка проверки пользователя (check_user): \n{e}")
+        logger.error(f"Ошибка проверки пользователя (check_user): \n{e}")
         return False
 
 
@@ -45,7 +45,7 @@ def add_user(tg_id, age, gender):
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка добавления пользователя (add_user): \n{e}")
+        logger.error(f"Ошибка добавления пользователя (add_user): \n{e}")
 
 
 # Функция для получения списка непройденных опросов из БД
@@ -70,7 +70,7 @@ def get_new_surveys(user_id):
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка получения непройденных опросов (get_new_surveys): \n{e}")
+        logger.error(f"Ошибка получения непройденных опросов (get_new_surveys): \n{e}")
         return []
 
 
@@ -94,7 +94,7 @@ def get_uncompleted_surveys(user_id):
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка получения незавершенных опросов (get_uncompleted_surveys): \n{e}")
+        logger.error(f"Ошибка получения незавершенных опросов (get_uncompleted_surveys): \n{e}")
         return []
 
 
@@ -112,7 +112,7 @@ def get_questions(opinion_id):
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка get_questions получения вопросов (get_questions): \n{e}")
+        logger.error(f"Ошибка get_questions получения вопросов (get_questions): \n{e}")
         return json.dumps([])
 
 
@@ -143,7 +143,7 @@ def SaveAns_UpdateQuest(tg_id, opinion_id, question_id, answer, next_question_id
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка при сохранении ответа/обновлении вопроса (SaveAns_UpdateQuest): \n{e}")
+        logger.error(f"Ошибка при сохранении ответа/обновлении вопроса (SaveAns_UpdateQuest): \n{e}")
 
 
 
@@ -163,9 +163,7 @@ def set_survey_paused(user_id, opinion_id):
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка при установке статуса паузы (set_survey_paused): \n{e}")
-        raise  # Пробрасываем исключение для обработки в вызывающем коде
-
+        logger.error(f"Ошибка при установке статуса паузы (set_survey_paused): \n{e}")
 
 # Функция для получения текущего вопроса из базы данных
 def get_current_question_id(user_id, opinion_id):
@@ -184,5 +182,5 @@ def get_current_question_id(user_id, opinion_id):
         finally:
             connection_pool.putconn(conn)
     except Exception as e:
-        print(f"Ошибка получения текущего вопроса (get_current_question_id): \n{e}")
+        logger.error(f"Ошибка получения текущего вопроса (get_current_question_id): \n{e}")
         return None

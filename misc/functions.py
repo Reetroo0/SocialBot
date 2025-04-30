@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from misc.pgSQL import SaveAns_UpdateQuest
-from config import bot
+from config import bot, logger
 from aiogram.fsm.context import FSMContext
 
 #ans:<ответ>:<opinion_id>:<question_id>
@@ -132,7 +132,7 @@ async def SendNextQuestion(user_id: int, state: FSMContext, resume: bool = False
     question_text = next_question["question"]
     text, keyboard, max_choices, err = ParseQuestion(opinion_id, question_id, question_text)
     if err:
-        print(f"Ошибка парсинга вопроса: \n{err}")
+        logger.error(f"Ошибка парсинга вопроса: {err}")
         await state.update_data(current_question_id=question_id)
         await SendNextQuestion(user_id, state)
         return
@@ -183,7 +183,7 @@ async def complete_survey(user_id: int, opinion_id: int, current_question_id: in
         else:
             await bot.send_message(user_id, completion_text)
     except Exception as e:
-        print(f"Ошибка при завершении опроса: \n{e}")
+        logger.error(f"Ошибка при завершении опроса: \n{e}")
         await bot.send_message(user_id, completion_text)
     
     await state.clear()
@@ -202,7 +202,7 @@ async def send_or_edit_message(user_id: int, text: str, keyboard: InlineKeyboard
         message = await bot.send_message(user_id, text, reply_markup=keyboard)
         return message.message_id
     except Exception as e:
-        print(f"Ошибка при отправке/редактировании сообщения: \n{e}")
+        logger.error(f"Ошибка при отправке/редактировании сообщения: \n{e}")
         return None
 
 

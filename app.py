@@ -1,5 +1,5 @@
 import asyncio
-from config import bot, dp
+from config import bot, dp ,logger
 from misc.pgSQL import pgConnect
 from misc.keyboards import main_menu
 from handlers import start, survey, UnCompSurvey
@@ -22,5 +22,5 @@ async def main():
 
 
 if __name__ == '__main__':
-    print('Бот запущен')
+    logger.info("Бот запущен")
     asyncio.run(main())
