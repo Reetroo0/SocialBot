@@ -184,3 +184,37 @@ def get_current_question_id(user_id, opinion_id):
     except Exception as e:
         logger.error(f"Ошибка получения текущего вопроса (get_current_question_id): \n{e}")
         return None
+
+# Функция для получения информации о профиле пользователя
+def get_profile_info(user_id):
+    try:
+        conn = connection_pool.getconn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    '''
+                    SELECT
+                        (SELECT COUNT(*) 
+                         FROM current_users_questions 
+                         WHERE user_id = %s AND is_completed_survey = TRUE) AS surveys_count,
+                        (SELECT COUNT(*) 
+                         FROM users_answers 
+                         WHERE user_id = %s) AS answers_count;
+                    ''',
+                    (user_id, user_id) 
+                )
+                result = cur.fetchone() 
+
+                # Если результат существует, формируем словарь
+                if result:
+                    return {
+                        "surveys_count": result[0],
+                        "answers_count": result[1]
+                    }
+                else:
+                    return None
+        finally:
+            connection_pool.putconn(conn) 
+    except Exception as e:
+        logger.error(f"Ошибка получения информации о профиле (get_profile_info): \n{e}")
+        return None

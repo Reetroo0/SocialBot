@@ -17,11 +17,9 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-# Инициализируем aiogram
 bot = Bot(token=os.getenv('BOT_TOKEN'))
 dp = Dispatcher(storage=MemoryStorage())
 
-# Получаем DSN из .env
 dsn = os.getenv('DSN')
 
 # Создание пула соединений
@@ -31,3 +29,13 @@ try:
 except psycopg2.OperationalError as e:
     logger.error(f"Failed to connect to database: {e}")
     raise
+
+# Список рангов и их пороговых значений
+ranks = {
+    0: "Котёнок",
+    50: "Лисёнок",
+    100: "Волк",
+    150: "Тигр",
+    200: "Дракон",
+    250: "Феникс"
+}

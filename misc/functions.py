@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from misc.pgSQL import SaveAns_UpdateQuest
-from config import bot, logger
+from config import bot, logger, ranks
 from aiogram.fsm.context import FSMContext
 
 #ans:<ответ>:<opinion_id>:<question_id>
@@ -206,3 +206,20 @@ async def send_or_edit_message(user_id: int, text: str, keyboard: InlineKeyboard
         return None
 
 
+# Функция для определения текущего ранга и количества опросов до следующего ранга
+def CalculateRank(surveys_count):
+    # current_rank = None
+    # next_rank = None
+    for rank in ranks:
+        if surveys_count >= rank:
+            current_rank = ranks[rank]
+        else:
+            next_rank = rank
+            break
+    
+    # Если достигнут максимальный ранг
+    if current_rank == ranks[max(ranks)]:
+        return current_rank, 0
+    # Вычисляем количество опросов до следующего ранга
+    surveys_until_next_rank = next_rank - surveys_count if next_rank else 0
+    return current_rank, surveys_until_next_rank

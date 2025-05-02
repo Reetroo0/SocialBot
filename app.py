@@ -2,7 +2,7 @@ import asyncio
 from config import bot, dp ,logger
 from misc.pgSQL import pgConnect
 from misc.keyboards import main_menu
-from handlers import start, survey, UnCompSurvey
+from handlers import start, survey, UnCompSurvey, profile
 
 
 async def main():
@@ -10,7 +10,8 @@ async def main():
     dp.include_routers(start.router)
     dp.include_routers(survey.router)
     dp.include_routers(UnCompSurvey.router)
-
+    dp.include_routers(profile.router)
+    
     # Подключение к БД
     pgConnect()
 
