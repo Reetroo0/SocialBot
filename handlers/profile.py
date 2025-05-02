@@ -5,9 +5,6 @@ from misc.pgSQL import get_profile_info
 from misc.functions import CalculateRank
 
 
-
-
-
 router = Router()
 
 @router.message(F.text == "Профиль")
