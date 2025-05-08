@@ -87,14 +87,12 @@ def GenerateKeyboard(page, callback_prefix, items):
     # Создаем клавиатуру
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
 
-    # Добавляем кнопки с опросами
     for theme, id_opinion in current_items:
         # Обрезаем название до 16 символов для кнопки
         #display_name = theme[:20] + "..." if len(theme) > 12 else theme
         keyboard.inline_keyboard.append([
             InlineKeyboardButton(text=f"{theme}",callback_data=f"{callback_prefix}:{id_opinion}")])
 
-    # Кнопки навигации
     nav_buttons = [
         InlineKeyboardButton(text="⬅️", callback_data=f"{callback_prefix}_page:{page-1}") if page > 0 else None,
         InlineKeyboardButton(text=f"{page+1} / {total_pages}", callback_data="ignore"),

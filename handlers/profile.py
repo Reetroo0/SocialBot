@@ -21,8 +21,8 @@ async def start(message: Message):
     profile_message = (
         f"📊 Твой профиль:\n\n"
         f"📈 Ранг: {rank}\n"
-        f"📝 Прошёл опросов: {statistics["surveys_count"]}\n"
-        f"📚 Число ответов: {statistics["answers_count"]}\n"
+        f"📝 Прошёл опросов: {statistics['surveys_count']}\n"
+        f"📚 Число ответов: {statistics['answers_count']}\n"
     )
     
     if next_rank > 0:
