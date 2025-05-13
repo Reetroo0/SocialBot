@@ -124,10 +124,12 @@ def SaveAns_UpdateQuest(tg_id, opinion_id, question_id, answer, next_question_id
             with conn.cursor() as cur:
                 # Сохраняем ответ в UsersAnswers, если ответ предоставлен
                 if answer is not None:
-                    answer_json = json.dumps({"answer": answer}, ensure_ascii=False)
+                    # Убедимся, что answer всегда массив строк
+                    answer_array = answer if isinstance(answer, list) else [str(answer)]
+                    # Передаем массив строк напрямую для text[]
                     cur.execute('''INSERT INTO users_answers (quest_id, survey_id, user_id, answer)
                                  VALUES (%s, %s, %s, %s)''',
-                               (question_id, opinion_id, tg_id, answer_json))
+                               (question_id, opinion_id, tg_id, answer_array))
                 
                 # Удаляем существующую запись для этого пользователя и опроса
                 cur.execute('''DELETE FROM current_users_questions 
