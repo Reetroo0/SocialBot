@@ -105,7 +105,7 @@ async def handleSingleChoice(callback_query: CallbackQuery, state: FSMContext):
         callback_query.from_user.id,
         opinion_id,
         question_id,
-        [answer],  # Передаем как массив строк
+        answer,  # Передаем как массив строк
         question_id
     )
     
@@ -133,7 +133,6 @@ async def handleTextAnswer(message: Message, state: FSMContext):
         message.text,
         question_id
     )
-    
     # Удаляем сообщение с ответом пользователя
     await message.delete()
     
