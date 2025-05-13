@@ -100,17 +100,18 @@ async def handleSingleChoice(callback_query: CallbackQuery, state: FSMContext):
     opinion_id = int(opinion_id)
     question_id = int(question_id)
     
-    # Сохраняем ответ
+    # Передаем ответ как массив строк
     SaveAns_UpdateQuest(
         callback_query.from_user.id,
         opinion_id,
         question_id,
-        answer,
+        [answer],  # Передаем как массив строк
         question_id
     )
     
     # НЕ удаляем сообщение, а отправляем следующий вопрос
     await SendNextQuestion(callback_query.from_user.id, state)
+
 
 # Обработка текстовых ответов
 @router.message(OpinionState.opinion, F.text)
