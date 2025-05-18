@@ -38,7 +38,7 @@ def ParseQuestion(opinion_id, question_id, question, selected=None):
 
         elif question_type == "multiple_choice":
             options = question.get("options", [])
-            max_choices = question.get("max_choices")
+            max_choices = question.get("max_choice")
             if selected is None:
                 selected = []
             for option in options:
