@@ -190,12 +190,7 @@ async def complete_survey(user_id: int, opinion_id: int, current_question_id: in
 async def send_or_edit_message(user_id: int, text: str, keyboard: InlineKeyboardMarkup | None, prev_message_id: int | None) -> int | None:
     try:
         if prev_message_id:
-            await bot.edit_message_text(
-                text=text,
-                chat_id=user_id,
-                message_id=prev_message_id,
-                reply_markup=keyboard
-            )
+            await bot.edit_message_text(text=text, chat_id=user_id, message_id=prev_message_id, reply_markup=keyboard)
             return prev_message_id
         message = await bot.send_message(user_id, text, reply_markup=keyboard)
         return message.message_id
