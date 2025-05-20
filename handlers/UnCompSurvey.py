@@ -27,8 +27,9 @@ async def changePageResOpinion(callback_query: CallbackQuery):
 @router.message(F.text == "Непройденные опросы")
 async def showUncompOpinions(message: Message):
     await message.delete()
-    keyboard = GenerateKeyboard(0, "res_opinion", get_uncompleted_surveys(message.from_user.id))
-    if not keyboard:
+    uncompSurveys = get_uncompleted_surveys(message.from_user.id)
+    keyboard = GenerateKeyboard(0, "res_opinion", uncompSurveys)
+    if len(uncompSurveys) == 0:
         await message.answer("У вас нет незавершенных опросов.")
         return
     await message.answer("Выберите опрос для продолжения:", reply_markup=keyboard)

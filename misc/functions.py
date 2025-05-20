@@ -19,6 +19,8 @@ def ParseQuestion(opinion_id, question_id, question, selected=None):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[])
 
         if question_type == "text":
+            # Добавляем к тексту вопроса строку для текстовых вопросов
+            text = f"{text}\n\ВВЕДИТЕ ОТВЕТ С КЛАВИАТУРЫ"
             # Для текстовых вопросов добавляем только кнопку паузы
             keyboard.inline_keyboard.append([
                 InlineKeyboardButton(text="⏸ Пауза", callback_data=f"pause:{opinion_id}:{question_id}")
@@ -158,7 +160,7 @@ async def SendNextQuestion(user_id: int, state: FSMContext, resume: bool = False
 def get_next_question(current_question_id: int, questions: list) -> dict | None:
     if not questions:
         return None
-    if not current_question_id:  # Первый вопрос
+    if not current_question_id:
         return questions[0]
     for i, q in enumerate(questions):
         if q["id"] == current_question_id and i + 1 < len(questions):
