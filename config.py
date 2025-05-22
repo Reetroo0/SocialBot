@@ -5,15 +5,14 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
 import psycopg2.pool
 
+# Настройка логирования
 logging.basicConfig(
-    level=logging.INFO,  # Минимальный уровень логов
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Формат логов
-    handlers=[
-        logging.StreamHandler()  # Вывод в консоль
-    ]
+    level=logging.INFO,                                          
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]                              
 )
-
 logger = logging.getLogger(__name__)
+logging.getLogger('aiogram.event').setLevel(logging.WARNING) 
 
 load_dotenv()
 

@@ -15,13 +15,10 @@ def ParseQuestion(opinion_id, question_id, question, selected=None):
         text = question["question"]
         row = []
 
-        # Инициализируем клавиатуру
         keyboard = InlineKeyboardMarkup(inline_keyboard=[])
 
         if question_type == "text":
-            # Добавляем к тексту вопроса строку для текстовых вопросов
-            text = f"{text}\n\ВВЕДИТЕ ОТВЕТ С КЛАВИАТУРЫ"
-            # Для текстовых вопросов добавляем только кнопку паузы
+            text = f"{text}\n\nВВЕДИТЕ ОТВЕТ С КЛАВИАТУРЫ"
             keyboard.inline_keyboard.append([
                 InlineKeyboardButton(text="⏸ Пауза", callback_data=f"pause:{opinion_id}:{question_id}")
             ])
