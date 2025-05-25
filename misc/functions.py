@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from misc.pgSQL import SaveAns_UpdateQuest
+from misc.pgSQL import SaveAns_UpdateQuest, get_profile_info
 from config import bot, logger, ranks
 from aiogram.fsm.context import FSMContext
 
@@ -179,6 +179,7 @@ async def complete_survey(user_id: int, opinion_id: int, current_question_id: in
             )
         else:
             await bot.send_message(user_id, completion_text)
+        await SendStikerByRank(user_id, 2)
     except Exception as e:
         logger.error(f"Ошибка при завершении опроса: \n{e}")
         await bot.send_message(user_id, completion_text)
@@ -199,19 +200,35 @@ async def send_or_edit_message(user_id: int, text: str, keyboard: InlineKeyboard
 
 
 # Функция для определения текущего ранга и количества опросов до следующего ранга
-def CalculateRank(surveys_count):
-    # current_rank = None
-    # next_rank = None
-    for rank in ranks:
-        if surveys_count >= rank:
-            current_rank = ranks[rank]
+def CalculateRank(surveysCount):
+    currentRank = ranks[0]["name"]
+    
+    for rank in sorted(ranks.keys()):
+        if surveysCount >= rank:
+            currentRank = ranks[rank]["name"]
         else:
-            next_rank = rank
+            nextRank = rank
             break
     
     # Если достигнут максимальный ранг
-    if current_rank == ranks[max(ranks)]:
-        return current_rank, 0
+    if currentRank == ranks[max(ranks.keys())]["name"]:
+        return currentRank, 0
+    
     # Вычисляем количество опросов до следующего ранга
-    surveys_until_next_rank = next_rank - surveys_count if next_rank else 0
-    return current_rank, surveys_until_next_rank
+    surveys_until_next_rank = nextRank - surveysCount if nextRank is not None else 0
+    return currentRank, surveys_until_next_rank
+
+
+async def SendStikerByRank(user_id, seqNum):
+    surveysCount = get_profile_info(user_id)["surveys_count"]
+    for rank in sorted(ranks.keys()):
+        if surveysCount >= rank:
+            stickerPackName = ranks[rank]["pack"]  # Предполагается, что это имя набора стикеров
+            stickerPack = await bot.get_sticker_set(stickerPackName)  # Получаем StickerSet
+            break
+    await bot.send_sticker(chat_id=user_id, sticker=stickerPack.stickers[seqNum].file_id)
+    
+
+    
+
+

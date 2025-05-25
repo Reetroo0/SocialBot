@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 from misc.keyboards import main_menu
 from misc.pgSQL import get_profile_info
-from misc.functions import CalculateRank
+from misc.functions import CalculateRank, SendStikerByRank
 
 
 router = Router()
@@ -24,7 +24,7 @@ async def start(message: Message):
         f"📝 Прошёл опросов: {statistics['surveys_count']}\n"
         f"📚 Число ответов: {statistics['answers_count']}\n"
     )
-    
+    await SendStikerByRank(message.from_user.id, 1)
     if next_rank > 0:
         profile_message += f"✳️ Опросов до следующего ранга: {next_rank}\n"
     else:

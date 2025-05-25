@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from misc.keyboards import main_menu, gender_inl_kb, confirm_inl_kb
 from misc.pgSQL import add_user, check_user
+from misc.functions import SendStikerByRank
 
 router = Router()
 
@@ -20,11 +21,13 @@ class Regist(StatesGroup):
 @router.message(CommandStart())
 async def start(message: Message, state: FSMContext):
     if not check_user(message.from_user.id):
+        await SendStikerByRank(message.from_user.id, 1)
         msg = await message.answer("Добро пожаловать! Для начала, пожалуйста, укажите ваш возраст (только число):")
         await state.update_data(msg_id=msg.message_id)  # Сохраняем message_id
         await state.set_state(Regist.age)
 
     else:
+        await SendStikerByRank(message.from_user.id, 0)
         await message.answer("С возвращением!", reply_markup=main_menu)
 
 

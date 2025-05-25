@@ -31,10 +31,10 @@ except psycopg2.OperationalError as e:
 
 # Список рангов и их пороговых значений
 ranks = {
-    0: "Котёнок",
-    50: "Лисёнок",
-    100: "Волк",
-    150: "Тигр",
-    200: "Дракон",
-    250: "Феникс"
+    0:   {"name": "Котёнок", "pack": "soc_bot_rank_cat"},
+    50:  {"name": "Лисёнок", "pack": "soc_bot_rank_fox"},
+    100: {"name": "Волк",    "pack": "soc_bot_rank_wolf"},
+    150: {"name": "Тигр",    "pack": ""},
+    200: {"name": "Дракон",  "pack": ""},
+    250: {"name": "Феникс",  "pack": ""}
 }
