@@ -13,15 +13,12 @@ router = Router()
 class OpinionState(StatesGroup):
     opinion = State()
 
-
-
 # Обработка коллбеков для смены страницы опросов
-@router.callback_query(lambda c: c.data.startswith("opinion_page:"))
+@router.callback_query(F.data.startswith("opinion_page:"))
 async def changePageOpinion(callback_query: CallbackQuery):
     page = int(callback_query.data.split(":")[1])
     keyboard = GenerateKeyboard(page, "opinion", get_new_surveys(callback_query.from_user.id))
     await callback_query.message.edit_reply_markup(reply_markup=keyboard)
-
 
 # Обработка команды "Опросы"
 @router.message(F.text == "Опросы")
@@ -33,9 +30,8 @@ async def showOpinions(message: Message):
         return
     await message.answer("Выберите опрос:", reply_markup=keyboard)
 
-
 # Обработка выбора опроса
-@router.callback_query(lambda c: c.data.startswith("opinion:"))
+@router.callback_query(F.data.startswith("opinion:"))
 async def handleSelectOpinion(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.message.delete()
     
@@ -54,10 +50,8 @@ async def handleSelectOpinion(callback_query: CallbackQuery, state: FSMContext):
     # Отправляем первый вопрос
     await SendNextQuestion(callback_query.from_user.id, state)
 
-
-
 # Обработка multiple_choice
-@router.callback_query(OpinionState.opinion, lambda c: c.data.startswith("mans:"))
+@router.callback_query(OpinionState.opinion, F.data.startswith("mans:"))
 async def handleMultipleChoice(callback_query: CallbackQuery, state: FSMContext):
     _, answer, opinion_id, question_id = callback_query.data.split(":")
     data = await state.get_data()
@@ -94,7 +88,7 @@ async def handleMultipleChoice(callback_query: CallbackQuery, state: FSMContext)
         await SendNextQuestion(callback_query.from_user.id, state)
 
 # Обработка single_choice и scale
-@router.callback_query(OpinionState.opinion, lambda c: c.data.startswith("ans:"))
+@router.callback_query(OpinionState.opinion, F.data.startswith("ans:"))
 async def handleSingleChoice(callback_query: CallbackQuery, state: FSMContext):
     _, answer, opinion_id, question_id = callback_query.data.split(":")
     opinion_id = int(opinion_id)
@@ -111,7 +105,6 @@ async def handleSingleChoice(callback_query: CallbackQuery, state: FSMContext):
     
     # НЕ удаляем сообщение, а отправляем следующий вопрос
     await SendNextQuestion(callback_query.from_user.id, state)
-
 
 # Обработка текстовых ответов
 @router.message(OpinionState.opinion, F.text)
@@ -139,8 +132,7 @@ async def handleTextAnswer(message: Message, state: FSMContext):
     # Отправляем следующий вопрос (или редактируем текущее)
     await SendNextQuestion(message.from_user.id, state)
 
-
-@router.callback_query(lambda c: c.data.startswith("pause:"))
+@router.callback_query(F.data.startswith("pause:"))
 async def handlePause(callback_query: CallbackQuery, state: FSMContext):
     # Извлекаем opinion_id и question_id из callback_data
     _, opinion_id, question_id = callback_query.data.split(":")
