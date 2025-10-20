@@ -4,3 +4,6 @@ venv/
 .vscode/
 .env
 TEST.py
+migrate.py
+docker-compose.yml
+test.sql

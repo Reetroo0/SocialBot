@@ -5,13 +5,10 @@ from misc.pgSQL import get_new_surveys, get_questions, set_survey_paused
 import json
 from misc.functions import GenerateKeyboard, SendNextQuestion, ParseQuestion, SaveAns_UpdateQuest
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
+from misc.states import OpinionState
 
 router = Router()
 
-# Определяем состояние FSM
-class OpinionState(StatesGroup):
-    opinion = State()
 
 # Обработка коллбеков для смены страницы опросов
 @router.callback_query(F.data.startswith("opinion_page:"))
@@ -21,7 +18,7 @@ async def changePageOpinion(callback_query: CallbackQuery):
     await callback_query.message.edit_reply_markup(reply_markup=keyboard)
 
 # Обработка команды "Опросы"
-@router.message(F.text == "Опросы")
+@router.message(F.text == "Опросы") # , F.state.is_null()
 async def showOpinions(message: Message):
     await message.delete()
     keyboard = GenerateKeyboard(0, "opinion", get_new_surveys(message.from_user.id))
@@ -69,7 +66,8 @@ async def handleMultipleChoice(callback_query: CallbackQuery, state: FSMContext)
     
     # Обновляем клавиатуру
     current_question = next(q for q in data["questions"] if q["id"] == question_id)
-    text, keyboard, _, _ = ParseQuestion(opinion_id, question_id, current_question["question"], selected=multi_choices)
+    # Передаём весь объект вопроса в ParseQuestion
+    text, keyboard, _, _ = ParseQuestion(opinion_id, question_id, current_question, selected=multi_choices)
     
     # Редактируем текущее сообщение
     await callback_query.message.edit_text(text, reply_markup=keyboard)
@@ -112,12 +110,29 @@ async def handleTextAnswer(message: Message, state: FSMContext):
     data = await state.get_data()
     opinion_id = data.get("opinion_id")
     question_id = data.get("current_question_id")
-    
+
     if not question_id or not opinion_id:
         await message.answer("Произошла ошибка, начните опрос заново")
         await state.clear()
         return
-    
+
+    # Найдём текущий вопрос в списке
+    questions = data.get("questions", [])
+    current_question = next((q for q in questions if q["id"] == question_id), None)
+    if not current_question:
+        await message.answer("Произошла ошибка, попробуйте ещё раз.")
+        await state.clear()
+        return
+
+    # Принимаем текст только если тип вопроса — 'text'
+    if current_question.get("type") != "text":
+        # Игнорируем/удаляем любые текстовые сообщения при не‑текстовых вопросах
+        try:
+            await message.delete()
+        except Exception:
+            pass
+        return
+
     # Сохраняем текстовый ответ
     SaveAns_UpdateQuest(
         message.from_user.id,
@@ -127,8 +142,11 @@ async def handleTextAnswer(message: Message, state: FSMContext):
         question_id
     )
     # Удаляем сообщение с ответом пользователя
-    await message.delete()
-    
+    try:
+        await message.delete()
+    except Exception:
+        pass
+
     # Отправляем следующий вопрос (или редактируем текущее)
     await SendNextQuestion(message.from_user.id, state)
 
@@ -156,7 +174,18 @@ async def handlePause(callback_query: CallbackQuery, state: FSMContext):
         print(f"Ошибка при сохранении состояния паузы (handlePause): \n{e}")
 
     # Удаляем сообщение с вопросом
-    await callback_query.message.delete()
-    await callback_query.answer("Опрос приостановлен. Вы можете продолжить позже.")
+    try:
+        await callback_query.message.delete()
+    except Exception:
+        pass
+
+    # Уведомляем пользователя и отправляем главное меню
+    try:
+        from misc.keyboards import main_menu
+        await callback_query.message.answer("Опрос приостановлен. Вы можете продолжить позже.", reply_markup=main_menu)
+    except Exception:
+        # fallback: просто отвечаем
+        await callback_query.answer("Опрос приостановлен. Вы можете продолжить позже.")
+
     # Очищаем состояние
     await state.clear()

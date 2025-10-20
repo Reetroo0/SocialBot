@@ -7,7 +7,7 @@ from misc.functions import CalculateRank, SendStikerByRank
 
 router = Router()
 
-@router.message(F.text == "Профиль")
+@router.message(F.text == "Профиль") # , F.state.is_null()
 async def start(message: Message):
 
     statistics = get_profile_info(message.from_user.id)

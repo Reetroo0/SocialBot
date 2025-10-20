@@ -6,15 +6,9 @@ from aiogram.fsm.state import State, StatesGroup
 from misc.keyboards import main_menu, gender_inl_kb, confirm_inl_kb
 from misc.pgSQL import add_user, check_user
 from misc.functions import SendStikerByRank
+from misc.states import Regist
 
 router = Router()
-
-# Состояния для регистрации
-class Regist(StatesGroup):
-    age = State()
-    gender = State()
-    confirm = State()
-
 
 
 # Обработка команды /start

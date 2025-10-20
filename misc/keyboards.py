@@ -1,18 +1,15 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
-# Клавиатура главного меню
-main_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Опросы'),
-            KeyboardButton(text='Профиль'),
-        ],
-        [
-            KeyboardButton(text='Непройденные опросы'),
-        ]
+# Инлайновая клавиатура главного меню (заменяет прежнюю ReplyKeyboard)
+main_menu = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text='Опросы', callback_data='menu:opinions'),
+        InlineKeyboardButton(text='Профиль', callback_data='menu:profile'),
     ],
-    resize_keyboard=True
-)
+    [
+        InlineKeyboardButton(text='Непройденные опросы', callback_data='menu:uncompleted'),
+    ]
+])
 
 # Клавиатура для выбора пола
 gender_inl_kb = InlineKeyboardMarkup(
